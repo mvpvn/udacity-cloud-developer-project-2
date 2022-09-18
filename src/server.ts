@@ -31,34 +31,23 @@ import { Image, images as images_list } from './images';
 
   /**************************************************************************** */
 
-  let allFiles: string[] = [];
-  const cleanUp = (req: Request, res: Response, next: NextFunction) => {
-    const sendFile = res.sendFile.bind(res);
-    res.sendFile = (body: any) => {
-      sendFile(body);
-      deleteLocalFiles(allFiles)
-      allFiles = [];
-    }
-    next();
-  }
-
-  app.use('/', cleanUp)
-
   app.get("/filteredimage/", async (req, res) => {
-    let { image_url } = req.query;
+    const { image_url } = req.query;
 
+    // 1. validate the image_url query
     if (!image_url) {
       return res.status(422)
         .send(`image_url is required`);
     }
 
-    const image_path = await filterImageFromURL(image_url)
+    // 2. call filterImageFromURL(image_url) to filter the image
+    const filteredpath = await filterImageFromURL(image_url)
 
-    res.sendFile(image_path);
-    allFiles.push(image_path);
-
-    return res.status(200)
-      .send(`Image path: ${image_path}!`);
+    // 3. send the resulting file in the response
+    res.sendFile(filteredpath, () => {
+      // 4. deletes any files on the server on finish of the response
+      deleteLocalFiles([filteredpath])
+    });
 
   });
 
