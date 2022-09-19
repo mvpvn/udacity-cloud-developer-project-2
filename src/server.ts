@@ -1,8 +1,6 @@
-import express, {Router, Request, Response, NextFunction} from 'express';
+import express from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
-
-import { Image, images as images_list } from './images';
 
 (async () => {
 
