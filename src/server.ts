@@ -34,19 +34,23 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
     // 1. validate the image_url query
     if (!image_url) {
-      return res.status(422)
+      return res.status(400)
         .send(`image_url is required`);
     }
 
-    // 2. call filterImageFromURL(image_url) to filter the image
-    const filteredpath = await filterImageFromURL(image_url)
+    try {
 
-    // 3. send the resulting file in the response
-    res.sendFile(filteredpath, () => {
-      // 4. deletes any files on the server on finish of the response
-      deleteLocalFiles([filteredpath])
-    });
+      // 2. call filterImageFromURL(image_url) to filter the image
+      const filteredpath = await filterImageFromURL(image_url);
 
+      // 3. send the resulting file in the response
+      res.status(200).sendFile(filteredpath, () => {
+        // 4. deletes any files on the server on finish of the response
+        deleteLocalFiles([filteredpath])
+      });
+    } catch (err) {
+      res.status(422).send(`Not able to process the image, make sure image url is correct`);
+    }
   });
 
   //! END @TODO1
